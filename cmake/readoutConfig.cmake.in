@@ -7,6 +7,7 @@ find_dependency(appfwk)
 find_dependency(dataformats)
 find_dependency(folly)
 find_dependency(TBB)
+find_dependency(dfmessages)
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/@PROJECT_NAME@)
 
