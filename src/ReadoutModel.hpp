@@ -85,8 +85,6 @@ public:
           m_snb_sink.reset(new snb_sink_qt(qi.inst));
         } else if (qi.name == "fragments-dqm") {
           m_fragment_dqm_sink.reset(new fragment_sink_qt(qi.inst));
-        } else if (qi.name == "timesync-dqm") {
-          m_timesync_dqm_sink.reset(new timesync_sink_qt(qi.inst));
         } else {
           // throw error
           ers::error(ResourceQueueError(ERS_HERE, "Unknown queue requested!", qi.name, ""));
@@ -223,14 +221,14 @@ private:
         //TLOG_DEBUG(0) << "New timesync: daq=" << timesyncmsg.DAQ_time << " wall=" << timesyncmsg.system_time;
         if (timesyncmsg.daq_time != 0) {
           try {
-            m_timesync_sink->push(timesyncmsg);
-            m_timesync_dqm_sink->push(std::move(timesyncmsg));
+            m_timesync_sink->push(std::move(timesyncmsg));
           } catch (const ers::Issue &excpt) {
             ers::warning(CannotWriteToQueue(ERS_HERE, "timesync message queue", excpt));
           }
 
           if (m_fake_trigger) {
             dfmessages::DataRequest dr;
+            dr.request_mode = dfmessages::DataRequest::mode_t::kDFReadout;
             dr.trigger_timestamp = timesyncmsg.daq_time > 500*time::us ? timesyncmsg.daq_time - 500*time::us : 0;
             auto width = 1000;
             uint offset = 100;
@@ -363,7 +361,6 @@ private:
   std::chrono::milliseconds m_timesync_queue_timeout_ms;
   using timesync_sink_qt = appfwk::DAQSink<dfmessages::TimeSync>;
   std::unique_ptr<timesync_sink_qt> m_timesync_sink;
-  std::unique_ptr<timesync_sink_qt> m_timesync_dqm_sink;
   ReusableThread m_timesync_thread;
 
 };

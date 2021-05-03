@@ -105,10 +105,21 @@ protected:
     // Data availability is calculated here
     size_t occupancy_guess = m_latency_buffer->occupancy();
     dataformats::WIBHeader front_wh = *(reinterpret_cast<const dataformats::WIBHeader*>( m_latency_buffer->getPtr(0) )); // NOLINT
-    uint64_t start_win_ts = dr.window_begin;   // NOLINT
-    uint64_t end_win_ts = dr.window_end;   // NOLINT
     uint64_t last_ts = front_wh.get_timestamp();                           // NOLINT
     uint64_t newest_ts = last_ts + (occupancy_guess-m_safe_num_elements_margin) * m_tick_dist * m_frames_per_element; // NOLINT
+
+    uint64_t start_win_ts, end_win_ts;
+    if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
+      std::cout << "Normal request" << std::endl;
+      start_win_ts = dr.window_begin;
+      end_win_ts = dr.window_end;
+    } else {
+      // DQM readout
+      std::cout << "DQM request" << std::endl;
+      end_win_ts = newest_ts;
+      start_win_ts = end_win_ts - dr.window_end;
+    }
+
     int64_t time_tick_diff = (start_win_ts - last_ts) / m_tick_dist;      // NOLINT
     int32_t num_element_offset = time_tick_diff / m_frames_per_element;   // NOLINT
     uint32_t num_elements_in_window = (end_win_ts - start_win_ts) / (m_tick_dist * m_frames_per_element) + 1; // NOLINT
