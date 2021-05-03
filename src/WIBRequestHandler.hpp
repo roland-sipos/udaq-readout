@@ -37,8 +37,9 @@ class WIBRequestHandler : public DefaultRequestHandlerModel<types::WIB_SUPERCHUN
 public:
   explicit WIBRequestHandler(std::unique_ptr<ContinousLatencyBufferModel<types::WIB_SUPERCHUNK_STRUCT>>& latency_buffer,
                              std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& fragment_sink,
+                             std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& fragment_dqm_sink,
                              std::unique_ptr<appfwk::DAQSink<types::WIB_SUPERCHUNK_STRUCT>>& snb_sink)
-  : DefaultRequestHandlerModel<types::WIB_SUPERCHUNK_STRUCT, ContinousLatencyBufferModel<types::WIB_SUPERCHUNK_STRUCT>>(latency_buffer, fragment_sink, snb_sink)
+  : DefaultRequestHandlerModel<types::WIB_SUPERCHUNK_STRUCT, ContinousLatencyBufferModel<types::WIB_SUPERCHUNK_STRUCT>>(latency_buffer, fragment_sink, fragment_dqm_sink, snb_sink)
   {
     TLOG_DEBUG(TLVL_WORK_STEPS) << "WIBRequestHandler created...";
   } 
@@ -211,7 +212,13 @@ protected:
    try {
      TLOG_DEBUG(TLVL_QUEUE_PUSH) << "Sending fragment with trigger_number " << frag->get_trigger_number()
                                  << ", run number " << frag->get_run_number() << ", and GeoID " << frag->get_link_id();
-     m_fragment_sink->push( std::move(frag) );
+
+     // Push result to the right queue
+     if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
+       m_fragment_sink->push( std::move(frag) );
+     } else if (dr.request_mode == dfmessages::DataRequest::mode_t::kDQMReadout) {
+       m_fragment_dqm_sink->push( std::move(frag) );
+     }
    }
    catch (const ers::Issue& excpt) {
      std::ostringstream oss;

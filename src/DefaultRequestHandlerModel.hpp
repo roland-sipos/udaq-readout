@@ -42,9 +42,11 @@ class DefaultRequestHandlerModel : public RequestHandlerConcept<RawType, Latency
 public:
   explicit DefaultRequestHandlerModel(std::unique_ptr<LatencyBufferType>& latency_buffer,
                                       std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& fragment_sink,
+                                      std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& fragment_dqm_sink,
                                       std::unique_ptr<appfwk::DAQSink<RawType>>& snb_sink)
   : m_latency_buffer(latency_buffer)
   , m_fragment_sink(fragment_sink)
+  , m_fragment_dqm_sink(fragment_dqm_sink)
   , m_snb_sink(snb_sink)
   , m_pop_limit_pct(0.0f)
   , m_pop_size_pct(0.0f)
@@ -231,8 +233,9 @@ protected:
   // Data access (LB)
   std::unique_ptr<LatencyBufferType>& m_latency_buffer;
 
-  // Request source and Fragment sink
+  // Fragment sinks
   std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& m_fragment_sink;
+  std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& m_fragment_dqm_sink;
 
   // Sink for SNB data
   std::unique_ptr<appfwk::DAQSink<RawType>>& m_snb_sink;

@@ -36,8 +36,9 @@ class WIB2RequestHandler : public DefaultRequestHandlerModel<types::WIB2_SUPERCH
 public:
   explicit WIB2RequestHandler(std::unique_ptr<ContinousLatencyBufferModel<types::WIB2_SUPERCHUNK_STRUCT>>& latency_buffer,
                               std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& fragment_sink,
+                              std::unique_ptr<appfwk::DAQSink<std::unique_ptr<dataformats::Fragment>>>& fragment_dqm_sink,
                               std::unique_ptr<appfwk::DAQSink<types::WIB2_SUPERCHUNK_STRUCT>>& snb_sink)
-  : DefaultRequestHandlerModel<types::WIB2_SUPERCHUNK_STRUCT, ContinousLatencyBufferModel<types::WIB2_SUPERCHUNK_STRUCT>>(latency_buffer, fragment_sink, snb_sink)
+  : DefaultRequestHandlerModel<types::WIB2_SUPERCHUNK_STRUCT, ContinousLatencyBufferModel<types::WIB2_SUPERCHUNK_STRUCT>>(latency_buffer, fragment_sink, fragment_dqm_sink, snb_sink)
   {
     TLOG_DEBUG(TLVL_WORK_STEPS) << "WIB2RequestHandler created...";
   } 
@@ -212,7 +213,12 @@ protected:
    frag->set_header_fields(frag_header);
    // Push to Fragment queue
    try {
-     m_fragment_sink->push( std::move(frag) );
+     // Push result to the right queue
+     if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
+       m_fragment_sink->push( std::move(frag) );
+     } else if (dr.request_mode == dfmessages::DataRequest::mode_t::kDQMReadout) {
+       m_fragment_dqm_sink->push( std::move(frag) );
+     }
    }
    catch (const ers::Issue& excpt) {
      std::ostringstream oss;
