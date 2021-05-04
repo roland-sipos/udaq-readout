@@ -110,12 +110,10 @@ protected:
 
     uint64_t start_win_ts, end_win_ts;
     if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
-      std::cout << "Normal request" << std::endl;
       start_win_ts = dr.window_begin;
       end_win_ts = dr.window_end;
     } else {
       // DQM readout
-      std::cout << "DQM request" << std::endl;
       end_win_ts = newest_ts;
       start_win_ts = end_win_ts - dr.window_end;
     }
@@ -125,8 +123,7 @@ protected:
     uint32_t num_elements_in_window = (end_win_ts - start_win_ts) / (m_tick_dist * m_frames_per_element) + 1; // NOLINT
     int32_t min_num_elements = num_element_offset + num_elements_in_window + m_safe_num_elements_margin; //NOLINT
      
-
-    TLOG_DEBUG(TLVL_WORK_STEPS) << "TPC (WIB frame) data request for " 
+    TLOG_DEBUG(TLVL_WORK_STEPS) << "TPC (WIB frame) data request for "
       << "Trigger TS=" << dr.trigger_timestamp << " "
       << "Oldest stored TS=" << last_ts << " "
       << "Start of window TS=" << start_win_ts << " "
@@ -215,7 +212,6 @@ protected:
    // Create fragment from pieces
 
    auto frag = std::make_unique<dataformats::Fragment>(frag_pieces);
-
 
    // Set header
    frag->set_header_fields(frag_header);

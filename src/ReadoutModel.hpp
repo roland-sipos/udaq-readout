@@ -74,16 +74,22 @@ public:
     for (const auto& qi : m_queue_config.qinfos) { 
       try {
         if (qi.name == "raw_input") {
+          TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_raw_data_source.reset(new raw_source_qt(qi.inst));
         } else if (qi.name == "requests") {
+          TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_request_source.reset(new request_source_qt(qi.inst));
         } else if (qi.name == "timesync") {
+          TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_timesync_sink.reset(new timesync_sink_qt(qi.inst));
         } else if (qi.name == "fragments") {
+          TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_fragment_sink.reset(new fragment_sink_qt(qi.inst));
         } else if (qi.name == "snb") {
+          TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_snb_sink.reset(new snb_sink_qt(qi.inst));
         } else if (qi.name == "fragments-dqm") {
+          TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_fragment_dqm_sink.reset(new fragment_sink_qt(qi.inst));
         } else {
           // throw error
@@ -232,6 +238,8 @@ private:
             dr.trigger_timestamp = timesyncmsg.daq_time > 500*time::us ? timesyncmsg.daq_time - 500*time::us : 0;
             auto width = 1000;
             uint offset = 100;
+            //dr.window_begin = 0;
+            //dr.window_end = 10;
             dr.window_begin = dr.trigger_timestamp > offset ? dr.trigger_timestamp - offset : 0;
             dr.window_end = dr.window_begin + width;
             TLOG_DEBUG(TLVL_WORK_STEPS) << "Issuing fake trigger based on timesync. "
