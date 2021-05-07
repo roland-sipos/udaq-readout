@@ -85,10 +85,10 @@ public:
         } else if (qi.name == "fragments") {
           TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_fragment_sink.reset(new fragment_sink_qt(qi.inst));
-        } else if (qi.name == "snb") {
+        } else if (qi.name == "raw_recording") {
           TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_snb_sink.reset(new snb_sink_qt(qi.inst));
-        } else if (qi.name == "fragments-dqm") {
+        } else if (qi.name == "fragments_dqm") {
           TLOG_DEBUG(TLVL_WORK_STEPS) << "Set up " << qi.name << " queue";
           m_fragment_dqm_sink.reset(new fragment_sink_qt(qi.inst));
         } else {
