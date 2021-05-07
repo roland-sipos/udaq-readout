@@ -214,9 +214,9 @@ protected:
    // Push to Fragment queue
    try {
      // Push result to the right queue
-     if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
+     if (dr.readout_type == dfmessages::ReadoutType::kLocalized) {
        m_fragment_sink->push( std::move(frag) );
-     } else if (dr.request_mode == dfmessages::DataRequest::mode_t::kDQMReadout) {
+     } else if (dr.readout_type == dfmessages::ReadoutType::kMonitoring) {
        m_fragment_dqm_sink->push( std::move(frag) );
      }
    }

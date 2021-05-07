@@ -109,7 +109,7 @@ protected:
     uint64_t newest_ts = last_ts + (occupancy_guess-m_safe_num_elements_margin) * m_tick_dist * m_frames_per_element; // NOLINT
 
     uint64_t start_win_ts, end_win_ts;
-    if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
+    if (dr.readout_type == dfmessages::ReadoutType::kLocalized) {
       start_win_ts = dr.window_begin;
       end_win_ts = dr.window_end;
     } else {
@@ -122,7 +122,7 @@ protected:
     int32_t num_element_offset = time_tick_diff / m_frames_per_element;   // NOLINT
     uint32_t num_elements_in_window = (end_win_ts - start_win_ts) / (m_tick_dist * m_frames_per_element) + 1; // NOLINT
     int32_t min_num_elements = num_element_offset + num_elements_in_window + m_safe_num_elements_margin; //NOLINT
-     
+
     TLOG_DEBUG(TLVL_WORK_STEPS) << "TPC (WIB frame) data request for "
       << "Trigger TS=" << dr.trigger_timestamp << " "
       << "Oldest stored TS=" << last_ts << " "
@@ -221,9 +221,9 @@ protected:
                                  << ", run number " << frag->get_run_number() << ", and GeoID " << frag->get_link_id();
 
      // Push result to the right queue
-     if (dr.request_mode == dfmessages::DataRequest::mode_t::kDFReadout) {
+     if (dr.readout_type == dfmessages::ReadoutType::kLocalized) {
        m_fragment_sink->push( std::move(frag) );
-     } else if (dr.request_mode == dfmessages::DataRequest::mode_t::kDQMReadout) {
+     } else if (dr.readout_type == dfmessages::ReadoutType::kMonitoring) {
        m_fragment_dqm_sink->push( std::move(frag) );
      }
    }

@@ -234,12 +234,12 @@ private:
 
           if (m_fake_trigger) {
             dfmessages::DataRequest dr;
-            dr.request_mode = dfmessages::DataRequest::mode_t::kDFReadout;
+            dr.readout_type = dfmessages::ReadoutType::kLocalized;
             dr.trigger_timestamp = timesyncmsg.daq_time > 500*time::us ? timesyncmsg.daq_time - 500*time::us : 0;
             auto width = 1000;
             uint offset = 100;
             //dr.window_begin = 0;
-            //dr.window_end = 10;
+            //dr.window_end = 1000;
             dr.window_begin = dr.trigger_timestamp > offset ? dr.trigger_timestamp - offset : 0;
             dr.window_end = dr.window_begin + width;
             TLOG_DEBUG(TLVL_WORK_STEPS) << "Issuing fake trigger based on timesync. "
