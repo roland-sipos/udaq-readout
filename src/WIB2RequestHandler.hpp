@@ -108,10 +108,19 @@ protected:
     size_t occupancy_guess = m_latency_buffer->occupancy();
     auto front_frame = *(reinterpret_cast<const dataformats::WIB2Frame*>(m_latency_buffer->get_ptr(0))); // NOLINT
     uint64_t last_ts = front_frame.get_timestamp(); // NOLINT(build/unsigned)
-    uint64_t start_win_ts = dr.window_begin;        // NOLINT(build/unsigned)
-    uint64_t end_win_ts = dr.window_end;            // NOLINT(build/unsigned)
     uint64_t newest_ts =                            // NOLINT(build/unsigned)
       last_ts + (occupancy_guess - m_safe_num_elements_margin) * m_tick_dist * m_frames_per_element;
+
+    uint64_t start_win_ts, end_win_ts;
+    if (dr.readout_type == dfmessages::ReadoutType::kLocalized) {
+      start_win_ts = dr.window_begin;
+      end_win_ts = dr.window_end;
+    } else {
+      // DQM readout
+      end_win_ts = newest_ts;
+      start_win_ts = end_win_ts - dr.window_end;
+    }
+
     int64_t time_tick_diff = (start_win_ts - last_ts) / m_tick_dist;
     int32_t num_element_offset = time_tick_diff / m_frames_per_element;
     uint32_t num_elements_in_window = // NOLINT(build/unsigned)

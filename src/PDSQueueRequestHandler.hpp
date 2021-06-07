@@ -124,8 +124,16 @@ protected:
     uint64_t last_ts = front_frame.get_timestamp();  // NOLINT(build/unsigned)
     uint64_t newest_ts = last_frame.get_timestamp(); // NOLINT(build/unsigned)
 
-    uint64_t start_win_ts = dr.window_begin; // NOLINT(build/unsigned)
-    uint64_t end_win_ts = dr.window_end;     // NOLINT(build/unsigned)
+    uint64_t start_win_ts, end_win_ts;
+    if (dr.readout_type == dfmessages::ReadoutType::kLocalized) {
+      start_win_ts = dr.window_begin;
+      end_win_ts = dr.window_end;
+    } else {
+      // DQM readout
+      end_win_ts = newest_ts;
+      start_win_ts = end_win_ts - dr.window_end;
+    }
+
     auto start_idx = m_latency_buffer->find_index(start_win_ts);
     auto end_idx = m_latency_buffer->find_index(end_win_ts);
     // std::cout << start_idx << ", " << end_idx << std::endl;
@@ -225,9 +233,13 @@ protected:
 
     // Set header
     frag->set_header_fields(frag_header);
-    // Push to Fragment queue
     try {
-      m_fragment_sink->push(std::move(frag));
+      // Push result to the right queue
+      if (dr.readout_type == dfmessages::ReadoutType::kLocalized) {
+        m_fragment_sink->push( std::move(frag) );
+      } else if (dr.readout_type == dfmessages::ReadoutType::kMonitoring) {
+        m_fragment_dqm_sink->push( std::move(frag) );
+      }
     } catch (const ers::Issue& excpt) {
       std::ostringstream oss;
       oss << "fragments output queueu for link " << m_link_number;
